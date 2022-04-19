@@ -34,3 +34,19 @@ resource "aws_s3_bucket_acl" "lambda_bucket_acl" {
   bucket = random_pet.lambda_bucket_name.id
   acl = "private"
 }
+
+data "archive_file" "datetime_lambda" {
+  type = "zip"
+
+  source_dir  = "${path.module}/lambda"
+  output_path = "${path.module}/datetime-lambda.zip"
+}
+
+resource "aws_s3_object" "datetime_lambda" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+
+  key    = "datetime-lambda.zip"
+  source = data.archive_file.datetime_lambda.output_path
+
+  etag = filemd5(data.archive_file.datetime_lambda.output_path)
+}
